@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book Car Service</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; }
+    input, select, textarea { display: block; margin: 10px 0; width: 300px; padding: 8px; }
+    button { padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h2>Book a Car Service</h2>
+  <form id="bookingForm">
+    <input type="text" id="customerName" placeholder="Your Name" required />
+    <input type="text" id="carModel" placeholder="Car Model" required />
+    <input type="text" id="location" placeholder="Your Location" required />
+    <input type="text" id="garageId" placeholder="Garage ID" required />
+    <textarea id="problem" placeholder="Describe the problem" required></textarea>
+    <button type="submit">Book Now</button>
+  </form>
+
+  <p id="message"></p>
+
+  <script>
+    document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const response = await fetch('http://localhost:5000/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName: document.getElementById('customerName').value,
+          phone: document.getElementById('location').value,
+          service: document.getElementById('carModel').value,
+          garageId: document.getElementById('garageId').value
+        })
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (err) {
+        result = { error: 'Server error or invalid response' };
+      }
+      document.getElementById('message').innerText = result.message || result.error || "Something went wrong";
+    });
+  </script>
+</body>
+</html>

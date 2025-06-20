@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Garage Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; }
+    select, button { padding: 10px; margin-bottom: 20px; width: 320px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h2>Garage Booking Dashboard</h2>
+
+  <select id="garageSelect">
+    <option value="">Select a Garage</option>
+  </select>
+  <button onclick="fetchBookings()">Fetch Bookings</button>
+
+  <table id="bookingTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Customer Name</th>
+        <th>Car Model</th>
+        <th>Location</th>
+        <th>Problem Description</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <p id="message"></p>
+
+  <script>
+    async function loadGarages() {
+      const response = await fetch('http://localhost:5000/api/garages/nearby');
+      const garages = await response.json();
+      const select = document.getElementById('garageSelect');
+
+      garages.forEach(garage => {
+        const option = document.createElement('option');
+        option.value = garage._id;
+        option.textContent = `${garage.name} (${garage.location})`;
+        select.appendChild(option);
+      });
+    }
+
+    async function fetchBookings() {
+      const garageId = document.getElementById('garageSelect').value;
+      if (!garageId) return alert("Please select a garage");
+
+      const response = await fetch(`http://localhost:5000/api/bookings/${garageId}`);
+      const result = await response.json();
+
+      const table = document.getElementById('bookingTable');
+      const body = document.getElementById('tableBody');
+      const message = document.getElementById('message');
+
+      body.innerHTML = '';
+      if (result.length === 0) {
+        table.style.display = 'none';
+        message.innerText = 'No bookings found for this garage.';
+      } else {
+        table.style.display = 'table';
+        result.forEach(booking => {
+          const row = `<tr>
+            <td>${booking.userName || ''}</td>
+            <td>${booking.service || ''}</td>
+            <td>${booking.phone || ''}</td>
+            <td>${booking.status || ''}</td>
+            <td>${booking._id || ''}</td>
+          </tr>`;
+          body.innerHTML += row;
+        });
+        message.innerText = '';
+      }
+    }
+
+    window.onload = loadGarages;
+  </script>
+</body>
+</html>

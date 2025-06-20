@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Garage Registration</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; }
+    input, textarea { display: block; margin: 10px 0; width: 300px; padding: 8px; }
+    button { padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h2>Register Garage</h2>
+  <form id="garageForm">
+    <input type="text" id="name" placeholder="Garage Name" required />
+    <input type="text" id="location" placeholder="Location" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <textarea id="services" placeholder="Comma-separated services e.g. Car Wash, Oil Change" required></textarea>
+    <button type="submit">Register Garage</button>
+  </form>
+
+  <p id="message"></p>
+
+  <script>
+    document.getElementById('garageForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const response = await fetch('http://localhost:5000/api/garages/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('name').value,
+          location: document.getElementById('location').value,
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+          services: document.getElementById('services').value.split(',').map(s => s.trim())
+        })
+      });
+
+      const result = await response.json();
+      document.getElementById('message').innerText = result.message;
+    });
+  </script>
+</body>
+</html>
