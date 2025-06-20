@@ -25,7 +25,7 @@
     document.getElementById('bookingForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const response = await fetch('http://localhost:5000/api/bookings', {
+      const response = await fetch('https://my-garage-backend-na1w.onrender.com/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

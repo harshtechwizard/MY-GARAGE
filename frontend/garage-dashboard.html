@@ -35,7 +35,7 @@
 
   <script>
     async function loadGarages() {
-      const response = await fetch('http://localhost:5000/api/garages/nearby');
+      const response = await fetch('https://my-garage-backend-na1w.onrender.com/api/garages/nearby');
       const garages = await response.json();
       const select = document.getElementById('garageSelect');
 
@@ -51,7 +51,7 @@
       const garageId = document.getElementById('garageSelect').value;
       if (!garageId) return alert("Please select a garage");
 
-      const response = await fetch(`http://localhost:5000/api/bookings/${garageId}`);
+      const response = await fetch(`https://my-garage-backend-na1w.onrender.com/api/bookings/${garageId}`);
       const result = await response.json();
 
       const table = document.getElementById('bookingTable');
