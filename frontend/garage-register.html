@@ -278,13 +278,25 @@
                 
                 if (response.ok) {
                     messageDiv.className = 'alert alert-success';
-                    messageDiv.textContent = '✓ ' + (result.message || 'Garage registered successfully! You can now log in.');
+                    messageDiv.textContent = '✓ ' + (result.message || 'Garage registered successfully! Redirecting to login...');
                     form.reset();
                     
-                    // Redirect after success
-                    setTimeout(() => {
-                        window.location.href = 'garage-dashboard.html';
-                    }, 2000);
+                    // Store token and redirect to dashboard
+                    if (result.token) {
+                        localStorage.setItem('authToken', result.token);
+                        localStorage.setItem('userType', 'garage');
+                        localStorage.setItem('garageId', result.garage.id);
+                        localStorage.setItem('garageName', result.garage.name);
+                        
+                        setTimeout(() => {
+                            window.location.href = 'garage-dashboard.html';
+                        }, 1500);
+                    } else {
+                        // Fallback to login page if no token
+                        setTimeout(() => {
+                            window.location.href = 'garage-login.html';
+                        }, 2000);
+                    }
                 } else {
                     messageDiv.className = 'alert alert-error';
                     messageDiv.textContent = '✗ ' + (result.message || 'Registration failed. Please try again.');

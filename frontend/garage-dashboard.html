@@ -14,6 +14,9 @@
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="styles.css">
     
+    <!-- Auth utilities -->
+    <script src="auth-utils.js"></script>
+    
     <style>
         .dashboard-page {
             min-height: 100vh;
@@ -336,6 +339,23 @@
     </div>
 
     <script>
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const authToken = localStorage.getItem('authToken');
+            const userType = localStorage.getItem('userType');
+            const garageId = localStorage.getItem('garageId');
+            
+            // If logged in as garage, auto-select and load
+            if (authToken && userType === 'garage' && garageId) {
+                const select = document.getElementById('garageSelect');
+                // Wait for garages to load, then auto-select
+                setTimeout(() => {
+                    select.value = garageId;
+                    fetchBookings();
+                }, 1000);
+            }
+        });
+
         // Load garages on page load
         async function loadGarages() {
             try {

@@ -14,6 +14,9 @@
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="styles.css">
     
+    <!-- Auth utilities -->
+    <script src="auth-utils.js"></script>
+    
     <style>
         .booking-page {
             min-height: 100vh;
@@ -136,7 +139,18 @@
                 </div>
 
                 <div class="info-box">
-                    ℹ️ <strong>Quick Tip:</strong> Have your garage ID ready. You can find it on the garage's profile or contact them directly.
+                    ℹ️ <strong>Quick Tip:</strong> Browse available garages below or enter a specific garage ID if you already know it.
+                </div>
+
+                <!-- Garage Selection Section -->
+                <div class="form-group">
+                    <label for="garageSelect" class="form-label">🔧 Select Garage</label>
+                    <select id="garageSelect" class="form-control">
+                        <option value="">Choose a garage...</option>
+                    </select>
+                    <small style="color: rgba(255, 255, 255, 0.6); font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+                        Or enter garage ID manually below
+                    </small>
                 </div>
 
                 <form id="bookingForm">
@@ -215,6 +229,38 @@
     </div>
 
     <script>
+        // Load available garages
+        window.addEventListener('DOMContentLoaded', async function() {
+            const authToken = localStorage.getItem('authToken');
+            const userName = localStorage.getItem('userName');
+            
+            // Pre-fill name if logged in
+            if (authToken && userName) {
+                document.getElementById('customerName').value = userName;
+            }
+
+            // Load garages
+            try {
+                const response = await fetch('https://my-garage-backend-na1w.onrender.com/api/garages/nearby');
+                const garages = await response.json();
+                const select = document.getElementById('garageSelect');
+
+                garages.forEach(garage => {
+                    const option = document.createElement('option');
+                    option.value = garage._id;
+                    option.textContent = `${garage.name} - ${garage.location}`;
+                    select.appendChild(option);
+                });
+
+                // Auto-fill garage ID when selection changes
+                select.addEventListener('change', function() {
+                    document.getElementById('garageId').value = this.value;
+                });
+            } catch (error) {
+                console.error('Error loading garages:', error);
+            }
+        });
+
         const form = document.getElementById('bookingForm');
         const bookBtn = document.getElementById('bookBtn');
         const btnText = document.getElementById('btnText');
