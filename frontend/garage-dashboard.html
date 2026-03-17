@@ -3,279 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garage Dashboard - Car Service App</title>
+    <meta name="description" content="Manage your garage bookings and operations">
+    <title>Garage Dashboard - AutoCare Pro</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .dashboard-page {
             min-height: 100vh;
-            color: white;
-            padding: 2rem 1rem;
+            padding: var(--spacing-xl) var(--spacing-md);
         }
 
         .dashboard-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .header {
+        .dashboard-header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: var(--spacing-2xl);
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        .header h2 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(45deg, #fff, #f0f0f0);
+        .dashboard-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: var(--spacing-xs);
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .header p {
-            opacity: 0.8;
-            font-size: 1.1rem;
+        .dashboard-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.125rem;
         }
 
-        .controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            justify-content: center;
+        .controls-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--spacing-xl);
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
         }
 
-        .form-group {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #ffd700;
-        }
-
-        .form-group select {
-            width: 100%;
-            padding: 1rem;
-            border: none;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-        }
-
-        .form-group select:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #ffd700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-        }
-
-        .form-group select option {
-            background: #333;
-            color: white;
-        }
-
-        .fetch-btn {
-            padding: 1rem 2rem;
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 150px;
-        }
-
-        .fetch-btn:hover {
-            background: linear-gradient(45deg, #44a08d, #4ecdc4);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .back-btn {
-            padding: 0.8rem 1.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .booking-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 2rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .booking-table th {
-            background: rgba(255, 215, 0, 0.2);
-            color: #ffd700;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .booking-table td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .booking-table tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .message {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            font-size: 1.1rem;
-            opacity: 0.8;
-        }
-
-        .stats {
+        .controls-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: 1fr auto auto;
+            gap: var(--spacing-md);
+            align-items: end;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            animation: fadeInUp 0.6s ease-out 0.4s backwards;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 15px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--glass-border);
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all var(--transition-base);
         }
 
-        .stat-card h3 {
-            font-size: 2rem;
-            color: #ffd700;
-            margin-bottom: 0.5rem;
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-gold);
         }
 
-        .stat-card p {
-            opacity: 0.8;
-            font-size: 0.9rem;
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-xs);
+            display: block;
         }
 
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 2rem 1rem;
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+        }
+
+        .table-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.6s ease-out 0.6s backwards;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .table-title {
+            font-size: 1.5rem;
+            color: var(--white);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .data-table thead {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .data-table th {
+            padding: var(--spacing-md);
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent-gold);
+            border-bottom: 2px solid var(--glass-border);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .data-table tbody tr {
+            transition: all var(--transition-fast);
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(255, 152, 0, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-completed {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-2xl);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: var(--spacing-2xl);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .loading-spinner-large {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: var(--spacing-md);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
             }
-            
-            .controls {
-                flex-direction: column;
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
-            
-            .booking-table {
-                font-size: 0.9rem;
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
-            
-            .booking-table th,
-            .booking-table td {
-                padding: 0.8rem 0.5rem;
+
+            .table-card {
+                padding: var(--spacing-md);
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: var(--spacing-sm);
+                font-size: 0.875rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="header">
-            <h2>📊 Garage Dashboard</h2>
-            <p>Manage and view your garage bookings</p>
-        </div>
-
-        <div class="controls">
-            <div class="form-group">
-                <label for="garageSelect">🔧 Select Garage</label>
-                <select id="garageSelect">
-                    <option value="">Choose a garage...</option>
-                </select>
+    <div class="dashboard-page">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">📊 Garage Dashboard</h1>
+                <p class="dashboard-subtitle">Manage your bookings and track performance</p>
             </div>
-            <button onclick="fetchBookings()" class="fetch-btn">📋 Fetch Bookings</button>
-            <a href="index.html" class="back-btn">← Back to Home</a>
-        </div>
 
-        <div class="stats" id="stats" style="display: none;">
-            <div class="stat-card">
-                <h3 id="totalBookings">0</h3>
-                <p>Total Bookings</p>
+            <!-- Controls -->
+            <div class="controls-card">
+                <div class="controls-grid">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="garageSelect" class="form-label">🔧 Select Garage</label>
+                        <select id="garageSelect" class="form-control">
+                            <option value="">Choose a garage...</option>
+                        </select>
+                    </div>
+                    <button onclick="fetchBookings()" class="btn btn-secondary">
+                        � Load Bookings
+                    </button>
+                    <a href="index.html" class="btn btn-outline">
+                        ← Home
+                    </a>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3 id="pendingBookings">0</h3>
-                <p>Pending</p>
+
+            <!-- Stats -->
+            <div id="statsSection" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">📊</span>
+                        <div class="stat-value" id="totalBookings">0</div>
+                        <div class="stat-label">Total Bookings</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">⏳</span>
+                        <div class="stat-value" id="pendingBookings">0</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">✅</span>
+                        <div class="stat-value" id="completedBookings">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">⭐</span>
+                        <div class="stat-value">4.8</div>
+                        <div class="stat-label">Avg Rating</div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3 id="completedBookings">0</h3>
-                <p>Completed</p>
+
+            <!-- Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h2 class="table-title">Recent Bookings</h2>
+                </div>
+
+                <div id="loadingState" class="loading-state" style="display: none;">
+                    <div class="loading-spinner-large"></div>
+                    <p>Loading bookings...</p>
+                </div>
+
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <h3>No Bookings Yet</h3>
+                    <p>Select a garage and click "Load Bookings" to view appointments</p>
+                </div>
+
+                <div id="tableWrapper" class="table-wrapper" style="display: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>👤 Customer</th>
+                                <th>🚗 Service</th>
+                                <th>📞 Contact</th>
+                                <th>📝 Status</th>
+                                <th>⏰ Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="message" style="display: none; margin-top: var(--spacing-md);"></div>
             </div>
         </div>
-
-        <div id="loading" class="loading" style="display: none;">
-            ⏳ Loading bookings...
-        </div>
-
-        <table id="bookingTable" class="booking-table" style="display:none;">
-            <thead>
-                <tr>
-                    <th>👤 Customer Name</th>
-                    <th>🚗 Car Model</th>
-                    <th>📍 Location</th>
-                    <th>📝 Problem Description</th>
-                    <th>⏰ Time</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-
-        <div id="message" class="message" style="display: none;"></div>
     </div>
 
     <script>
+        // Load garages on page load
         async function loadGarages() {
             try {
                 const response = await fetch('https://my-garage-backend-na1w.onrender.com/api/garages/nearby');
@@ -296,35 +357,44 @@
         async function fetchBookings() {
             const garageId = document.getElementById('garageSelect').value;
             if (!garageId) {
-                alert("Please select a garage");
+                const messageDiv = document.getElementById('message');
+                messageDiv.style.display = 'block';
+                messageDiv.className = 'alert alert-warning';
+                messageDiv.textContent = '⚠️ Please select a garage first';
                 return;
             }
 
-            const loading = document.getElementById('loading');
-            const table = document.getElementById('bookingTable');
-            const body = document.getElementById('tableBody');
-            const message = document.getElementById('message');
-            const stats = document.getElementById('stats');
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+            const tableWrapper = document.getElementById('tableWrapper');
+            const tableBody = document.getElementById('tableBody');
+            const messageDiv = document.getElementById('message');
+            const statsSection = document.getElementById('statsSection');
 
-            loading.style.display = 'block';
-            table.style.display = 'none';
-            message.style.display = 'none';
-            stats.style.display = 'none';
+            // Show loading
+            loadingState.style.display = 'block';
+            emptyState.style.display = 'none';
+            tableWrapper.style.display = 'none';
+            messageDiv.style.display = 'none';
+            statsSection.style.display = 'none';
 
             try {
                 const response = await fetch(`https://my-garage-backend-na1w.onrender.com/api/bookings/${garageId}`);
                 const result = await response.json();
 
-                loading.style.display = 'none';
-                body.innerHTML = '';
+                loadingState.style.display = 'none';
+                tableBody.innerHTML = '';
 
                 if (result.length === 0) {
-                    table.style.display = 'none';
-                    message.style.display = 'block';
-                    message.textContent = 'No bookings found for this garage.';
+                    emptyState.style.display = 'block';
+                    emptyState.innerHTML = `
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No Bookings Found</h3>
+                        <p>This garage doesn't have any bookings yet</p>
+                    `;
                 } else {
-                    table.style.display = 'table';
-                    stats.style.display = 'grid';
+                    tableWrapper.style.display = 'block';
+                    statsSection.style.display = 'block';
                     
                     // Update stats
                     document.getElementById('totalBookings').textContent = result.length;
@@ -333,26 +403,40 @@
                     document.getElementById('pendingBookings').textContent = pending;
                     document.getElementById('completedBookings').textContent = completed;
 
+                    // Populate table
                     result.forEach(booking => {
-                        const row = `<tr>
+                        const status = booking.status || 'pending';
+                        const statusClass = status === 'completed' ? 'status-completed' : 'status-pending';
+                        const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
                             <td>${booking.userName || 'N/A'}</td>
                             <td>${booking.service || 'N/A'}</td>
                             <td>${booking.phone || 'N/A'}</td>
-                            <td>${booking.status || 'Pending'}</td>
-                            <td>${new Date(booking._id).toLocaleString()}</td>
-                        </tr>`;
-                        body.innerHTML += row;
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            <td>${new Date(booking.createdAt || booking._id).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</td>
+                        `;
+                        tableBody.appendChild(row);
                     });
                 }
             } catch (error) {
-                loading.style.display = 'none';
-                message.style.display = 'block';
-                message.textContent = 'Error fetching bookings. Please try again.';
+                loadingState.style.display = 'none';
+                messageDiv.style.display = 'block';
+                messageDiv.className = 'alert alert-error';
+                messageDiv.textContent = '✗ Error loading bookings. Please try again.';
                 console.error('Error:', error);
             }
         }
 
-        window.onload = loadGarages;
+        // Initialize
+        window.addEventListener('DOMContentLoaded', loadGarages);
     </script>
 </body>
-</html> 
+</html>

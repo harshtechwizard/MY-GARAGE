@@ -1,26 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const Garage = require('../models/Garage');
+const { 
+  registerGarage, 
+  loginGarage, 
+  getNearbyGarages,
+  getGarageProfile 
+} = require('../controllers/garageController');
+const { protect, restrictTo } = require("../middleware/auth");
+const { 
+  validateGarageRegistration, 
+  validateGarageLogin 
+} = require("../middleware/validation");
 
-// Register a new garage
-router.post('/register', async (req, res) => {
-  try {
-    const garage = new Garage(req.body);
-    await garage.save();
-    res.status(201).json(garage);
-  } catch (error) {
-    res.status(400).json({ message: 'Error registering garage', error });
-  }
-});
+// Public routes
+router.post('/register', validateGarageRegistration, registerGarage);
+router.post('/login', validateGarageLogin, loginGarage);
+router.get('/nearby', getNearbyGarages);
 
-// Get all garages (simulate "nearby")
-router.get('/nearby', async (req, res) => {
-  try {
-    const garages = await Garage.find();
-    res.status(200).json(garages);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching garages', error });
-  }
-});
+// Protected routes
+router.get('/profile', protect, restrictTo('garage'), getGarageProfile);
 
 module.exports = router;
