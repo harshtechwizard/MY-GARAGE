@@ -64,13 +64,7 @@ app.get("/", (req, res) => {
     });
 });
 
-// Apply auth limiter to login/register routes
-app.use("/api/users/login", authLimiter);
-app.use("/api/users/register", authLimiter);
-app.use("/api/garages/login", authLimiter);
-app.use("/api/garages/register", authLimiter);
-
-// Routes
+// Routes (mount routes BEFORE applying specific limiters)
 app.use("/api/users", userRoutes);
 app.use("/api/garages", garageRoutes);
 app.use("/api/bookings", bookingRoutes);
