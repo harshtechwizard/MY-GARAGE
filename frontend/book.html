@@ -12,10 +12,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./styles.css">
     
     <!-- Auth utilities -->
     <script src="auth-utils.js"></script>
+    <script src="config.js"></script>
+    <script src="api.js"></script>
     
     <style>
         .booking-page {
@@ -241,8 +243,7 @@
 
             // Load garages
             try {
-                const response = await fetch('https://my-garage-backend-na1w.onrender.com/api/garages/nearby');
-                const garages = await response.json();
+                const garages = await apiRequest('/api/garages/nearby', { timeoutMs: 12000 });
                 const select = document.getElementById('garageSelect');
 
                 garages.forEach(garage => {
@@ -275,48 +276,34 @@
             messageDiv.style.display = 'none';
 
             try {
-                const response = await fetch('https://my-garage-backend-na1w.onrender.com/api/bookings', {
+                const authToken = localStorage.getItem('authToken');
+                const result = await apiRequest('/api/bookings', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
+                    timeoutMs: 12000,
+                    token: authToken || undefined,
+                    body: {
                         userName: document.getElementById('customerName').value,
                         phone: document.getElementById('location').value,
                         service: document.getElementById('carModel').value,
                         garageId: document.getElementById('garageId').value
-                    })
+                    }
                 });
-
-                let result;
-                try {
-                    result = await response.json();
-                } catch (err) {
-                    result = { error: 'Server error or invalid response' };
-                }
                 
                 messageDiv.style.display = 'block';
                 
-                if (response.ok) {
-                    messageDiv.className = 'alert alert-success';
-                    messageDiv.textContent = '✓ ' + (result.message || 'Booking successful! We will contact you soon.');
-                    form.reset();
-                    
-                    // Reset button after delay
-                    setTimeout(() => {
-                        bookBtn.disabled = false;
-                        btnText.textContent = '🚀 Confirm Booking';
-                    }, 2000);
-                } else {
-                    messageDiv.className = 'alert alert-error';
-                    messageDiv.textContent = '✗ ' + (result.message || result.error || 'Booking failed. Please try again.');
-                    
-                    // Reset button
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = '✓ ' + (result.message || 'Booking successful! We will contact you soon.');
+                form.reset();
+                
+                // Reset button after delay
+                setTimeout(() => {
                     bookBtn.disabled = false;
                     btnText.textContent = '🚀 Confirm Booking';
-                }
+                }, 1200);
             } catch (error) {
                 messageDiv.style.display = 'block';
                 messageDiv.className = 'alert alert-error';
-                messageDiv.textContent = '✗ Network error. Please check your connection and try again.';
+                messageDiv.textContent = '✗ ' + (error?.message || 'Network error. Please check your connection and try again.');
                 
                 // Reset button
                 bookBtn.disabled = false;

@@ -18,12 +18,12 @@ const {
 // Public/authenticated routes
 router.post("/", validateBookingCreation, optionalAuth, createBooking);
 
-// Protected routes - garage only
-router.get("/:garageId", validateGarageId, getGarageBookings);
-router.put("/status/:id", validateMongoId, validateBookingStatusUpdate, protect, restrictTo('garage'), updateBookingStatus);
-
 // Protected routes - user only
 router.get("/user/my-bookings", protect, restrictTo('user'), getUserBookings);
+
+// Protected routes - garage only
+router.get("/:garageId", validateGarageId, protect, restrictTo('garage'), getGarageBookings);
+router.put("/status/:id", validateMongoId, validateBookingStatusUpdate, protect, restrictTo('garage'), updateBookingStatus);
 
 // Protected routes - both user and garage
 router.delete("/:id", validateMongoId, protect, deleteBooking);

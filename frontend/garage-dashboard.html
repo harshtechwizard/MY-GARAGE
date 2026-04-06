@@ -12,10 +12,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./styles.css">
     
     <!-- Auth utilities -->
     <script src="auth-utils.js"></script>
+    <script src="config.js"></script>
+    <script src="api.js"></script>
     
     <style>
         .dashboard-page {
@@ -267,7 +269,7 @@
                         </select>
                     </div>
                     <button onclick="fetchBookings()" class="btn btn-secondary">
-                        � Load Bookings
+                        📥 Load Bookings
                     </button>
                     <a href="index.html" class="btn btn-outline">
                         ← Home
@@ -359,8 +361,7 @@
         // Load garages on page load
         async function loadGarages() {
             try {
-                const response = await fetch('https://my-garage-backend-na1w.onrender.com/api/garages/nearby');
-                const garages = await response.json();
+                const garages = await apiRequest('/api/garages/nearby', { timeoutMs: 12000 });
                 const select = document.getElementById('garageSelect');
 
                 garages.forEach(garage => {
@@ -399,8 +400,11 @@
             statsSection.style.display = 'none';
 
             try {
-                const response = await fetch(`https://my-garage-backend-na1w.onrender.com/api/bookings/${garageId}`);
-                const result = await response.json();
+                const authToken = localStorage.getItem('authToken');
+                const result = await apiRequest(`/api/bookings/${garageId}`, {
+                    timeoutMs: 12000,
+                    token: authToken || undefined
+                });
 
                 loadingState.style.display = 'none';
                 tableBody.innerHTML = '';

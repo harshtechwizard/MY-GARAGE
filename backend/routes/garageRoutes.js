@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require("express-rate-limit");
 const { 
   registerGarage, 
   loginGarage, 
@@ -12,9 +13,18 @@ const {
   validateGarageLogin 
 } = require("../middleware/validation");
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: "Too many auth attempts, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true
+});
+
 // Public routes
-router.post('/register', validateGarageRegistration, registerGarage);
-router.post('/login', validateGarageLogin, loginGarage);
+router.post('/register', authLimiter, validateGarageRegistration, registerGarage);
+router.post('/login', authLimiter, validateGarageLogin, loginGarage);
 router.get('/nearby', getNearbyGarages);
 
 // Protected routes

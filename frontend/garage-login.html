@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./styles.css">
     
     <style>
         .login-page {
@@ -196,6 +196,8 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
+    <script src="api.js"></script>
     <script>
         const form = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
@@ -214,45 +216,32 @@
             messageDiv.style.display = 'none';
             
             try {
-                const response = await fetch('https://my-garage-backend-na1w.onrender.com/api/garages/login', {
+                const result = await apiRequest('/api/garages/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
+                    body: { email, password },
+                    timeoutMs: 12000
                 });
-
-                const result = await response.json();
                 
                 messageDiv.style.display = 'block';
                 
-                if (response.ok) {
-                    messageDiv.className = 'alert alert-success';
-                    messageDiv.textContent = '✓ Login successful! Redirecting...';
-                    
-                    // Store token and garage info
-                    if (result.token) {
-                        localStorage.setItem('authToken', result.token);
-                        localStorage.setItem('userType', 'garage');
-                        localStorage.setItem('garageId', result.garage.id);
-                        localStorage.setItem('garageName', result.garage.name);
-                    }
-                    
-                    setTimeout(() => {
-                        window.location.href = 'garage-dashboard.html';
-                    }, 1500);
-                } else {
-                    messageDiv.className = 'alert alert-error';
-                    messageDiv.textContent = '✗ ' + (result.message || 'Login failed. Please check your credentials.');
-                    
-                    // Reset button
-                    loginBtn.disabled = false;
-                    btnText.textContent = '🚀 Sign In';
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = '✓ Login successful! Redirecting...';
+                
+                // Store token and garage info
+                if (result.token) {
+                    localStorage.setItem('authToken', result.token);
+                    localStorage.setItem('userType', 'garage');
+                    localStorage.setItem('garageId', result.garage.id);
+                    localStorage.setItem('garageName', result.garage.name);
                 }
+                
+                setTimeout(() => {
+                    window.location.href = 'garage-dashboard.html';
+                }, 800);
             } catch (error) {
                 messageDiv.style.display = 'block';
                 messageDiv.className = 'alert alert-error';
-                messageDiv.textContent = '✗ Network error. Please check your connection and try again.';
+                messageDiv.textContent = '✗ ' + (error?.message || 'Network error. Please check your connection and try again.');
                 
                 // Reset button
                 loginBtn.disabled = false;

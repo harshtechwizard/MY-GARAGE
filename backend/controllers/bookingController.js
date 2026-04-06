@@ -15,6 +15,7 @@ exports.createBooking = async (req, res) => {
 
     // Create booking
     const booking = await Booking.create({
+      userId: req.userType === "user" ? req.user?._id : undefined,
       userName,
       phone,
       service,
@@ -38,6 +39,13 @@ exports.createBooking = async (req, res) => {
 exports.getGarageBookings = async (req, res) => {
   try {
     const { garageId } = req.params;
+
+    // A garage can only view its own bookings
+    if (String(req.user?._id) !== String(garageId)) {
+      return res.status(403).json({
+        message: "You do not have permission to view these bookings."
+      });
+    }
 
     // Verify garage exists
     const garage = await Garage.findById(garageId);
@@ -66,18 +74,24 @@ exports.updateBookingStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // Find and update booking
-    const booking = await Booking.findByIdAndUpdate(
-      id, 
-      { status, updatedAt: Date.now() },
-      { new: true, runValidators: true }
-    );
-
-    if (!booking) {
+    const existing = await Booking.findById(id);
+    if (!existing) {
       return res.status(404).json({ 
         message: "Booking not found" 
       });
     }
+
+    // A garage can only update status for its own bookings
+    if (String(existing.garageId) !== String(req.user?._id)) {
+      return res.status(403).json({
+        message: "You do not have permission to update this booking."
+      });
+    }
+
+    // Update booking
+    existing.status = status;
+    existing.updatedAt = Date.now();
+    const booking = await existing.save();
 
     res.json({ 
       message: "Booking status updated successfully", 
@@ -94,9 +108,7 @@ exports.updateBookingStatus = async (req, res) => {
 
 exports.getUserBookings = async (req, res) => {
   try {
-    // This would require user authentication
-    // For now, return all bookings (in production, filter by user)
-    const bookings = await Booking.find()
+    const bookings = await Booking.find({ userId: req.user?._id })
       .populate('garageId', 'name location')
       .sort({ createdAt: -1 });
 
@@ -114,13 +126,24 @@ exports.deleteBooking = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const booking = await Booking.findByIdAndDelete(id);
+    const booking = await Booking.findById(id);
 
     if (!booking) {
       return res.status(404).json({ 
         message: "Booking not found" 
       });
     }
+
+    const isGarageOwner = req.userType === "garage" && String(booking.garageId) === String(req.user?._id);
+    const isUserOwner = req.userType === "user" && booking.userId && String(booking.userId) === String(req.user?._id);
+
+    if (!isGarageOwner && !isUserOwner) {
+      return res.status(403).json({
+        message: "You do not have permission to delete this booking."
+      });
+    }
+
+    await booking.deleteOne();
 
     res.json({ 
       message: "Booking deleted successfully" 

@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false
+  },
   userName: {
     type: String,
     required: [true, "User name is required"],
@@ -38,6 +43,9 @@ const bookingSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+bookingSchema.index({ garageId: 1, createdAt: -1 });
+bookingSchema.index({ userId: 1, createdAt: -1 });
 
 // Update the updatedAt timestamp before saving
 bookingSchema.pre("save", function(next) {

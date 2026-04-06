@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
+const compression = require("compression");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
@@ -27,14 +28,6 @@ const limiter = rateLimit({
 });
 app.use("/api/", limiter);
 
-// Stricter rate limit for auth endpoints
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 5 login attempts per windowMs
-    message: "Too many login attempts, please try again later.",
-    skipSuccessfulRequests: true,
-});
-
 // CORS configuration - restrict to specific origins in production
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production' 
@@ -44,6 +37,9 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
+
+// Basic response compression (JSON, text, etc.)
+app.use(compression());
 
 // Body parser with size limits
 app.use(express.json({ limit: '10kb' }));
