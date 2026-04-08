@@ -14,6 +14,9 @@ const bookingRoutes = require("./routes/bookingRoutes");
 
 const app = express();
 
+// Trust proxy - required for Render and other reverse proxies
+app.set('trust proxy', 1);
+
 // Security Middleware
 // Set security HTTP headers
 app.use(helmet());
