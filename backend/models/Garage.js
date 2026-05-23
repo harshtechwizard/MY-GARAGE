@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 
 const garageSchema = new mongoose.Schema({
+  uid: {
+    type: String,
+    required: [true, "Firebase UID is required"],
+    unique: true
+  },
   name: {
     type: String,
     required: [true, "Garage name is required"],
@@ -22,12 +26,6 @@ const garageSchema = new mongoose.Schema({
     trim: true,
     match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"]
   },
-  password: {
-    type: String,
-    required: [true, "Password is required"],
-    minlength: [6, "Password must be at least 6 characters"],
-    select: false // Don't return password by default
-  },
   services: {
     type: [String],
     validate: {
@@ -42,27 +40,5 @@ const garageSchema = new mongoose.Schema({
     default: Date.now
   }
 });
-
-// Hash password before saving
-garageSchema.pre("save", async function(next) {
-  // Only hash if password is modified
-  if (!this.isModified("password")) return next();
-  
-  // Hash password with cost of 12
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
-
-// Method to compare passwords
-garageSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-// Remove password from JSON output
-garageSchema.methods.toJSON = function() {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
-};
 
 module.exports = mongoose.model("Garage", garageSchema);

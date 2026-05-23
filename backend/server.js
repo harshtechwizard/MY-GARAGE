@@ -11,6 +11,7 @@ require("dotenv").config();
 const userRoutes = require("./routes/userRoutes");
 const garageRoutes = require("./routes/garageRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 
@@ -81,6 +82,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/garages", garageRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -111,10 +113,7 @@ if (!process.env.MONGO_URI) {
     process.exit(1);
 }
 
-if (!process.env.JWT_SECRET) {
-    console.error('JWT_SECRET environment variable is required!');
-    process.exit(1);
-}
+// JWT_SECRET no longer needed — auth is handled by Firebase Admin SDK
 
 console.log('Starting server...');
 console.log('Environment:', process.env.NODE_ENV || 'development');

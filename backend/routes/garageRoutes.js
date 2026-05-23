@@ -24,7 +24,7 @@ const authLimiter = rateLimit({
 
 // Public routes
 router.post('/register', authLimiter, validateGarageRegistration, registerGarage);
-router.post('/login', authLimiter, validateGarageLogin, loginGarage);
+router.post('/login', authLimiter, loginGarage);
 router.get('/nearby', getNearbyGarages);
 
 // Protected routes

@@ -1,31 +1,41 @@
 const User = require("../models/User");
-const { generateToken } = require("../middleware/auth");
+const admin = require("../firebaseAdmin");
 
 exports.registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email } = req.body;
+    
+    // Get token from header
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    // Verify token
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const uid = decodedToken.uid;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ uid });
     if (existingUser) {
       return res.status(400).json({ 
-        message: "User with this email already exists" 
+        message: "User already exists" 
       });
     }
 
-    // Create new user (password will be hashed by pre-save hook)
+    // Create new user
     const user = await User.create({
+      uid,
       name,
-      email,
-      password
+      email
     });
-
-    // Generate JWT token
-    const token = generateToken(user._id, 'user');
 
     res.status(201).json({ 
       message: "User registered successfully",
-      token,
       user: {
         id: user._id,
         name: user.name,
@@ -34,14 +44,6 @@ exports.registerUser = async (req, res) => {
     });
   } catch (error) {
     console.error('User registration error:', error);
-    
-    // Handle duplicate key error
-    if (error.code === 11000) {
-      return res.status(400).json({ 
-        message: "User with this email already exists" 
-      });
-    }
-    
     res.status(400).json({ 
       message: "Error registering user", 
       error: error.message 
@@ -51,32 +53,30 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
 
-    // Find user and explicitly select password field
-    const user = await User.findOne({ email }).select("+password");
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    // Verify token
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const uid = decodedToken.uid;
+
+    // Find user
+    const user = await User.findOne({ uid });
     
     if (!user) {
-      return res.status(401).json({ 
-        message: "Invalid email or password" 
+      return res.status(404).json({ 
+        message: "User not found in database. Please register first." 
       });
     }
-
-    // Check if password is correct
-    const isPasswordCorrect = await user.comparePassword(password);
-    
-    if (!isPasswordCorrect) {
-      return res.status(401).json({ 
-        message: "Invalid email or password" 
-      });
-    }
-
-    // Generate JWT token
-    const token = generateToken(user._id, 'user');
 
     res.json({ 
       message: "Login successful",
-      token,
       user: {
         id: user._id,
         name: user.name,

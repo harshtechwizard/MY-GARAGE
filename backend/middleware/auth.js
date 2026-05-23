@@ -1,29 +1,12 @@
-const jwt = require("jsonwebtoken");
+const admin = require("../firebaseAdmin");
 const User = require("../models/User");
 const Garage = require("../models/Garage");
-
-// Generate JWT token
-exports.generateToken = (id, type = 'user') => {
-  return jwt.sign({ id, type }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d"
-  });
-};
-
-// Verify JWT token
-exports.verifyToken = (token) => {
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch (error) {
-    return null;
-  }
-};
 
 // Protect routes - require authentication
 exports.protect = async (req, res, next) => {
   try {
     let token;
 
-    // Check if token exists in headers
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
       token = req.headers.authorization.split(" ")[1];
     }
@@ -34,32 +17,35 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    // Verify token
-    const decoded = exports.verifyToken(token);
+    // Verify token using Firebase Admin
+    const decodedToken = await admin.auth().verifyIdToken(token);
     
-    if (!decoded) {
+    if (!decodedToken) {
       return res.status(401).json({
         message: "Invalid or expired token. Please log in again."
       });
     }
 
-    // Check if user/garage still exists
-    let currentEntity;
-    if (decoded.type === 'user') {
-      currentEntity = await User.findById(decoded.id);
-    } else if (decoded.type === 'garage') {
-      currentEntity = await Garage.findById(decoded.id);
+    const uid = decodedToken.uid;
+
+    // Check if user/garage exists in our MongoDB
+    let currentEntity = await User.findOne({ uid });
+    let userType = 'user';
+    
+    if (!currentEntity) {
+      currentEntity = await Garage.findOne({ uid });
+      userType = 'garage';
     }
 
     if (!currentEntity) {
       return res.status(401).json({
-        message: "The account belonging to this token no longer exists."
+        message: "The account belonging to this token no longer exists in our database."
       });
     }
 
     // Grant access to protected route
     req.user = currentEntity;
-    req.userType = decoded.type;
+    req.userType = userType;
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
@@ -81,7 +67,7 @@ exports.restrictTo = (...types) => {
   };
 };
 
-// Optional authentication - doesn't fail if no token
+// Optional authentication
 exports.optionalAuth = async (req, res, next) => {
   try {
     let token;
@@ -91,26 +77,27 @@ exports.optionalAuth = async (req, res, next) => {
     }
 
     if (token) {
-      const decoded = exports.verifyToken(token);
+      const decodedToken = await admin.auth().verifyIdToken(token);
       
-      if (decoded) {
-        let currentEntity;
-        if (decoded.type === 'user') {
-          currentEntity = await User.findById(decoded.id);
-        } else if (decoded.type === 'garage') {
-          currentEntity = await Garage.findById(decoded.id);
+      if (decodedToken) {
+        const uid = decodedToken.uid;
+        let currentEntity = await User.findOne({ uid });
+        let userType = 'user';
+        
+        if (!currentEntity) {
+          currentEntity = await Garage.findOne({ uid });
+          userType = 'garage';
         }
 
         if (currentEntity) {
           req.user = currentEntity;
-          req.userType = decoded.type;
+          req.userType = userType;
         }
       }
     }
 
     next();
   } catch (error) {
-    // Continue without authentication
     next();
   }
 };

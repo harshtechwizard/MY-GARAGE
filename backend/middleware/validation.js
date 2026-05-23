@@ -4,6 +4,7 @@ const { body, param, validationResult } = require("express-validator");
 exports.validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.error("Validation failed for request:", req.originalUrl, "Body:", req.body, "Errors:", errors.array());
     return res.status(400).json({
       message: "Validation failed",
       errors: errors.array().map(err => ({
@@ -29,11 +30,6 @@ exports.validateUserRegistration = [
     .isEmail().withMessage("Please provide a valid email")
     .normalizeEmail(),
   
-  body("password")
-    .notEmpty().withMessage("Password is required")
-    .isLength({ min: 6 }).withMessage("Password must be at least 6 characters")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage("Password must contain at least one uppercase letter, one lowercase letter, and one number"),
-  
   exports.validate
 ];
 
@@ -44,9 +40,6 @@ exports.validateUserLogin = [
     .notEmpty().withMessage("Email is required")
     .isEmail().withMessage("Please provide a valid email")
     .normalizeEmail(),
-  
-  body("password")
-    .notEmpty().withMessage("Password is required"),
   
   exports.validate
 ];
@@ -69,11 +62,6 @@ exports.validateGarageRegistration = [
     .isEmail().withMessage("Please provide a valid email")
     .normalizeEmail(),
   
-  body("password")
-    .notEmpty().withMessage("Password is required")
-    .isLength({ min: 6 }).withMessage("Password must be at least 6 characters")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage("Password must contain at least one uppercase letter, one lowercase letter, and one number"),
-  
   body("services")
     .isArray({ min: 1 }).withMessage("At least one service must be provided")
     .custom((services) => {
@@ -93,9 +81,6 @@ exports.validateGarageLogin = [
     .notEmpty().withMessage("Email is required")
     .isEmail().withMessage("Please provide a valid email")
     .normalizeEmail(),
-  
-  body("password")
-    .notEmpty().withMessage("Password is required"),
   
   exports.validate
 ];
